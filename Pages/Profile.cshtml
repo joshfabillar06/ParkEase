@@ -1,0 +1,190 @@
+﻿@page
+@model parkEASE.Pages.ProfileModel
+@{
+    ViewData["Title"] = "User Profile";
+}
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+    .page-title { font-size: 1.5rem; font-weight: bold; }
+    .page-time { color: #94A3B8; font-size: 0.9rem; }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 25px;
+    }
+
+    .card {
+        background-color: #151C2C;
+        border: 1px solid #1E293B;
+        border-radius: 12px;
+        padding: 30px;
+    }
+
+    /* Profile Avatar & Info */
+    .profile-avatar-large {
+        width: 80px;
+        height: 80px;
+        background-color: #3B82F6;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        font-weight: bold;
+        margin: 0 auto 15px auto;
+    }
+
+    .profile-name { font-size: 1.3rem; font-weight: bold; text-align: center; margin-bottom: 4px; }
+    .profile-role-badge {
+        text-align: center;
+        display: inline-block;
+        background-color: rgba(59, 130, 246, 0.1);
+        color: #3B82F6;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .info-list { border-top: 1px solid #1E293B; }
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #1E293B;
+        font-size: 0.88rem;
+    }
+    .info-row .label { color: #94A3B8; }
+    .info-row .value { font-weight: bold; }
+
+    /* Change Password Form */
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 0.85rem; color: #94A3B8; margin-bottom: 8px; }
+    .form-input {
+        width: 100%;
+        padding: 12px;
+        background-color: #0F1523;
+        border: 1px solid #1E293B;
+        border-radius: 8px;
+        color: white;
+        box-sizing: border-box;
+        font-size: 0.9rem;
+    }
+    .form-input:focus { outline: none; border-color: #3B82F6; }
+
+    .btn-save {
+        background-color: #3B82F6;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn-save:hover { background-color: #2563EB; }
+
+    .btn-logout {
+        width: 100%;
+        background-color: #7F1D1D;
+        color: #FCA5A5;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background 0.2s;
+    }
+    .btn-logout:hover { background-color: #991B1B; }
+
+    .alert-success {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10B981;
+        border: 1px solid #10B981;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 0.85rem;
+    }
+
+    .alert-danger {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #EF4444;
+        border: 1px solid #EF4444;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 0.85rem;
+    }
+</style>
+
+<div class="header-date">
+    <i class="fa-regular fa-clock"></i>
+    <span class="pageClock"></span>
+</div>
+
+<div class="profile-grid">
+    <!-- Account Info Card -->
+    <div class="card" style="text-align: center;">
+        <div class="profile-avatar-large">
+            @(Model.CurrentUser?.FullName.FirstOrDefault().ToString().ToUpper() ?? "U")
+        </div>
+        <div class="profile-name">@(Model.CurrentUser?.FullName ?? "User")</div>
+        <div class="profile-role-badge">@(Model.CurrentUser?.Role ?? "Staff") Account</div>
+
+        <div class="info-list" style="text-align: left;">
+            <div class="info-row"><span class="label">Employee ID</span><span class="value">@(Model.CurrentUser?.EmployeeID ?? "-")</span></div>
+            <div class="info-row"><span class="label">Username</span><span class="value">@(Model.CurrentUser?.Username ?? "-")</span></div>
+            <div class="info-row"><span class="label">Account Status</span><span class="value" style="color: #10B981;">@(Model.CurrentUser?.AccountStatus ?? "Active")</span></div>
+            <div class="info-row"><span class="label">Created Date</span><span class="value">@(Model.CurrentUser?.CreatedAt.ToString("MMM dd, yyyy") ?? "-")</span></div>
+        </div>
+
+        <form method="post" asp-page-handler="Logout">
+            <button type="submit" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Log Out</button>
+        </form>
+    </div>
+
+    <!-- Password Management Card -->
+    <div class="card">
+        <h3 style="margin-top: 0; margin-bottom: 20px;"><i class="fa-solid fa-lock"></i> Security Settings</h3>
+
+        @if (!string.IsNullOrEmpty(Model.StatusMessage))
+        {
+            <div class="alert-success"><i class="fa-solid fa-circle-check"></i> @Model.StatusMessage</div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert-danger"><i class="fa-solid fa-circle-exclamation"></i> @Model.ErrorMessage</div>
+        }
+
+        <form method="post" asp-page-handler="ChangePassword">
+            <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password" asp-for="CurrentPassword" class="form-input" required />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">New Password</label>
+                <input type="password" asp-for="NewPassword" class="form-input" required />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Confirm New Password</label>
+                <input type="password" asp-for="ConfirmPassword" class="form-input" required />
+            </div>
+
+            <button type="submit" class="btn-save">Update Password</button>
+        </form>
+    </div>
+</div>

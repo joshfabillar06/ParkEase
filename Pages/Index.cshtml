@@ -1,0 +1,105 @@
+@page
+@model parkEASE.Pages.IndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+    var occupiedPercentage = Model.TotalSpaces > 0 ? (double)Model.OccupiedSpaces / Model.TotalSpaces * 100 : 0;
+    var maxPeakCount = Model.PeakHours.Count > 0 ? Math.Max(1, Model.PeakHours.Max(x => x.Count)) : 1;
+    var maxDailySales = Model.WeeklySalesChart.Count > 0 ? Math.Max(1m, Model.WeeklySalesChart.Max(x => x.Amount)) : 1m;
+}
+<style>
+    .dashboard-header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}.header-title{font-size:1.5rem;font-weight:750}.header-date{color:var(--text-muted);font-size:.88rem}
+    .metrics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:18px}.metric-card,.status-card,.insight-card,.content-box,.chart-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:18px;min-width:0}
+    .metric-label,.insight-label{color:var(--text-muted);font-size:.8rem;margin-bottom:8px}.metric-value{font-size:1.65rem;font-weight:750}.metric-sub{font-size:.72rem;color:var(--text-muted);margin-top:5px}
+    .status-card{margin-bottom:18px}.status-header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--text-muted);font-size:.85rem;margin-bottom:10px}.progress-bar-bg{height:9px;background:var(--bg-sub);border-radius:8px;overflow:hidden}.progress-bar-fill{height:100%;background:var(--accent-blue);border-radius:8px}
+    .insights-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:18px}.insight-card{display:flex;align-items:center;gap:12px}.insight-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:var(--badge-bg);color:var(--accent-blue);flex:none}.insight-value{font-weight:750;font-size:1.05rem}.insight-sub{font-size:.72rem;color:var(--text-muted);margin-top:3px}
+    .dashboard-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}.content-box,.chart-card{margin-bottom:16px}.box-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;font-weight:700}.view-all-link{color:var(--accent-blue);text-decoration:none;font-size:.82rem}
+    .data-table{width:100%;border-collapse:collapse;text-align:left;min-width:530px}.table-wrap{overflow-x:auto}.data-table th{color:var(--text-muted);font-size:.73rem;padding:10px 8px;border-bottom:1px solid var(--border-color)}.data-table td{padding:11px 8px;border-bottom:1px solid var(--border-color);font-size:.82rem}.badge{padding:4px 7px;border-radius:5px;font-size:.7rem;font-weight:700}.badge-paid{color:#10b981;background:rgba(16,185,129,.12)}.badge-parked{color:#f59e0b;background:rgba(245,158,11,.12)}
+    .chart{height:185px;display:flex;align-items:flex-end;gap:5px;padding-top:12px}.chart-item{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px}.chart-bar{width:100%;max-width:28px;min-height:2px;background:var(--accent-blue);border-radius:4px 4px 0 0}.chart-bar.peak{background:#10b981}.chart-label{font-size:.65rem;color:var(--text-muted);white-space:nowrap}.chart-empty{height:170px;display:grid;place-items:center;color:var(--text-muted);font-size:.86rem}.chart-caption{font-size:.75rem;color:var(--text-muted);margin-top:8px}
+    @@media(max-width:1100px){.metrics-grid,.insights-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-grid{grid-template-columns:1fr}}
+    @@media(max-width:620px){.metrics-grid,.insights-grid{grid-template-columns:1fr}.metric-value{font-size:1.5rem}}
+</style>
+
+<div class="dashboard-header">
+    <div class="header-title">Dashboard Overview</div>
+
+    <div class="header-date">
+        <i class="fa-regular fa-clock"></i>
+        <span id="dashboardClock"></span>
+    </div>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card"><div class="metric-label">Available Spaces</div><div class="metric-value">@Model.AvailableSpaces</div><div class="metric-sub">Ready for POS check-in</div></div>
+    <div class="metric-card"><div class="metric-label">Occupied Spaces</div><div class="metric-value">@Model.OccupiedSpaces</div><div class="metric-sub">Currently in use</div></div>
+    <div class="metric-card"><div class="metric-label">Active Total Spaces</div><div class="metric-value">@Model.TotalSpaces</div><div class="metric-sub">Excludes archived slots</div></div>
+    <div class="metric-card"><div class="metric-label">Sales Today</div><div class="metric-value">₱@Model.TodaySales.ToString("N2")</div><div class="metric-sub">Paid transactions today</div></div>
+</div>
+
+<div class="status-card">
+    <div class="status-header"><strong style="color:var(--text-primary)">Parking Capacity</strong><span>@Model.OccupiedSpaces of @Model.TotalSpaces occupied</span></div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:@occupiedPercentage.ToString("0.##")%"></div></div>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card"><div class="metric-label">Sales This Week</div><div class="metric-value">₱@Model.WeeklySales.ToString("N2")</div><div class="metric-sub">Current Monday–Sunday period</div></div>
+    <div class="metric-card"><div class="metric-label">Sales This Month</div><div class="metric-value">₱@Model.MonthlySales.ToString("N2")</div><div class="metric-sub">Current calendar month</div></div>
+    <div class="metric-card"><div class="metric-label">Average Weekly Sales</div><div class="metric-value">₱@Model.AverageWeeklySales.ToString("N2")</div><div class="metric-sub">Latest four calendar weeks</div></div>
+    <div class="metric-card"><div class="metric-label">Average Monthly Sales</div><div class="metric-value">₱@Model.AverageMonthlySales.ToString("N2")</div><div class="metric-sub">Latest six calendar months</div></div>
+</div>
+
+<div class="insights-grid">
+    <div class="insight-card"><div class="insight-icon"><i class="fa-solid fa-hourglass-half"></i></div><div><div class="insight-label">Average Stay</div><div class="insight-value">@Model.AverageStayHours.ToString("0.0") hours</div><div class="insight-sub">Completed parking sessions</div></div></div>
+    <div class="insight-card"><div class="insight-icon"><i class="fa-solid fa-calendar-day"></i></div><div><div class="insight-label">Peak Day</div><div class="insight-value">@Model.PeakDay</div><div class="insight-sub">Most vehicle arrivals</div></div></div>
+    <div class="insight-card"><div class="insight-icon"><i class="fa-solid fa-clock"></i></div><div><div class="insight-label">Peak Hour</div><div class="insight-value">@Model.PeakTime</div><div class="insight-sub">Most vehicle arrivals</div></div></div>
+    <div class="insight-card"><div class="insight-icon"><i class="fa-solid fa-car-side"></i></div><div><div class="insight-label">Top Vehicle Type</div><div class="insight-value">@Model.MostParkedVehicleType</div><div class="insight-sub">@Model.MostParkedVehicleCount total tickets</div></div></div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="content-box">
+        <div class="box-header"><span>Recent Transactions</span><a href="/Transactions" class="view-all-link">View All</a></div>
+        @if (Model.RecentTransactions.Any())
+        {
+            <div class="table-wrap"><table class="data-table"><thead><tr><th>Ticket ID</th><th>Plate</th><th>Vehicle</th><th>Amount</th><th>Status</th></tr></thead><tbody>
+            @foreach (var txn in Model.RecentTransactions)
+            {
+                var parked = txn.PaymentStatus == "Parked";
+                <tr><td>@txn.TransactionID</td><td>@txn.PlateNumber</td><td>@txn.VehicleType</td><td>@(parked ? "In progress" : "₱" + txn.TotalAmount.ToString("N2"))</td><td><span class="badge @(parked ? "badge-parked" : "badge-paid")">@txn.PaymentStatus</span></td></tr>
+            }
+            </tbody></table></div>
+        }
+        else { <div class="chart-empty">No transactions have been recorded yet.</div> }
+    </div>
+
+    <div class="chart-card">
+        <div class="box-header"><span>Peak Hours – Vehicle Arrivals</span><span class="muted" style="font-size:.75rem;font-weight:400">All recorded tickets</span></div>
+        @if (Model.PeakHours.Any(x => x.Count > 0))
+        {
+            <div class="chart">
+            @foreach (var hour in Model.PeakHours)
+            {
+                var height = (double)hour.Count / maxPeakCount * 100;
+                var isPeak = hour.Count > 0 && hour.Count == maxPeakCount;
+                <div class="chart-item" title="@hour.Label: @hour.Count arrivals"><div class="chart-bar @(isPeak ? "peak" : "")" style="height:@Math.Max(2,height)%"></div>@if(hour.Hour % 3 == 0){<span class="chart-label">@hour.Hour.ToString("00")</span>}</div>
+            }
+            </div>
+            <div class="chart-caption">Busiest hour: @Model.PeakTime. This chart uses ticket entry times.</div>
+        }
+        else { <div class="chart-empty">No arrival data available yet.</div> }
+    </div>
+
+    <div class="chart-card">
+        <div class="box-header"><span>Sales – Last 7 Days</span><span class="muted" style="font-size:.75rem;font-weight:400">₱@Model.WeeklySales.ToString("N2") this week</span></div>
+        @if (Model.WeeklySalesChart.Any(x => x.Amount > 0))
+        {
+            <div class="chart">
+            @foreach (var day in Model.WeeklySalesChart)
+            {
+                var height = (double)(day.Amount / maxDailySales) * 100;
+                <div class="chart-item" title="@day.Date.ToString("MMM dd"): ₱@day.Amount.ToString("N2")"><div class="chart-bar" style="height:@Math.Max(2,height)%"></div><span class="chart-label">@day.Label</span></div>
+            }
+            </div>
+            <div class="chart-caption">Revenue is attributed to the date payment was collected.</div>
+        }
+        else { <div class="chart-empty">No paid sales recorded in the last seven days.</div> }
+    </div>
+</div>

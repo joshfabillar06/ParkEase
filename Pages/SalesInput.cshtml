@@ -1,0 +1,780 @@
+@page
+@model parkEASE.Pages.SalesInputModel
+@{
+    ViewData["Title"] = "Sales Input (POS)";
+}
+
+@Html.AntiForgeryToken()
+
+<style>
+    .pos-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .pos-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .pos-time {
+        color: #94A3B8;
+        font-size: 0.9rem;
+    }
+
+    /* Mode Tabs */
+    .mode-tabs {
+        display: flex;
+        gap: 10px;
+        max-width: 650px;
+        margin: 0 auto 25px auto;
+    }
+
+    .mode-tab {
+        flex: 1;
+        padding: 14px;
+        text-align: center;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background-color: var(--bg-card);
+        color: var(--text-muted);
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .mode-tab.active {
+            border-color: var(--accent-blue);
+            background-color: var(--badge-bg);
+            color: var(--accent-blue);
+        }
+
+    /* Wizard Progress Bar */
+    .wizard-progress {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 40px;
+        margin-bottom: 35px;
+    }
+
+    .wizard-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+    }
+
+    .step-bubble {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #1E293B;
+        color: #94A3B8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .wizard-step.active .step-bubble {
+        background-color: #3B82F6;
+        color: white;
+    }
+
+    .wizard-step.completed .step-bubble {
+        background-color: #10B981;
+        color: white;
+    }
+
+    .step-label {
+        font-size: 0.8rem;
+        color: #94A3B8;
+    }
+
+    .wizard-step.active .step-label {
+        color: white;
+        font-weight: bold;
+    }
+
+    /* Container Card */
+    .pos-card {
+        background-color: #151C2C;
+        border: 1px solid #1E293B;
+        border-radius: 12px;
+        padding: 40px;
+        max-width: 650px;
+        margin: 0 auto;
+    }
+
+    /* Form Fields */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.85rem;
+        color: #94A3B8;
+        margin-bottom: 8px;
+    }
+
+    .form-input, .form-select {
+        width: 100%;
+        padding: 12px;
+        background-color: #0F1523;
+        border: 1px solid #1E293B;
+        border-radius: 8px;
+        color: white;
+        box-sizing: border-box;
+        font-size: 0.95rem;
+    }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3B82F6;
+        }
+
+    .fee-box {
+        background-color: #0F1523;
+        border: 1px solid #1E293B;
+        border-radius: 8px;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 25px;
+    }
+
+    .fee-amount {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #3B82F6;
+    }
+
+    /* Button Group */
+    .btn-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+        justify-content: flex-end;
+    }
+
+    .btn-primary {
+        background-color: #3B82F6;
+        color: white;
+        border: none;
+        padding: 12px 28px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+        .btn-primary:hover {
+            background-color: #2563EB;
+        }
+
+    .btn-secondary {
+        background-color: transparent;
+        border: 1px solid #1E293B;
+        color: #94A3B8;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    /* Details List */
+    .summary-list {
+        border-top: 1px solid #1E293B;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 14px 0;
+        border-bottom: 1px solid #1E293B;
+        font-size: 0.9rem;
+    }
+
+        .summary-row .label {
+            color: #94A3B8;
+        }
+
+        .summary-row .value {
+            font-weight: bold;
+        }
+
+    /* Payment Toggle */
+    .payment-options {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .pay-opt {
+        flex: 1;
+        padding: 15px;
+        background-color: #0F1523;
+        border: 1px solid #1E293B;
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+        .pay-opt.selected {
+            border-color: #3B82F6;
+            background-color: #1E293B;
+            color: #3B82F6;
+        }
+
+    /* Ticket Styling */
+    .ticket-box {
+        background-color: #0F1523;
+        border: 1px dashed #3B82F6;
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+    }
+
+    .ticket-qr {
+        margin: 20px 0;
+    }
+
+        .ticket-qr img {
+            width: 140px;
+            height: 140px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+    /* Currently Parked List */
+    .parked-list {
+        border: 1px solid #1E293B;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        max-height: 220px;
+        overflow-y: auto;
+    }
+
+    .parked-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid #1E293B;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+
+        .parked-row:last-child {
+            border-bottom: none;
+        }
+
+        .parked-row:hover {
+            background-color: #1E293B;
+        }
+
+        .parked-row .plate {
+            font-weight: bold;
+        }
+
+        .parked-row .meta {
+            color: #94A3B8;
+            font-size: 0.8rem;
+        }
+
+    .parked-empty {
+        padding: 20px;
+        text-align: center;
+        color: #94A3B8;
+        font-size: 0.85rem;
+    }
+
+    /* Print-Only Styles: Isolate and print whichever final step is active */
+    @@media print {
+        body * {
+            visibility: hidden !important;
+        }
+
+        .print-target, .print-target * {
+            visibility: visible !important;
+        }
+
+        body {
+            background-color: #ffffff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .app-container, .sidebar, .main-content, .pos-header, .mode-tabs, .wizard-progress, .pos-card {
+            background: none !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+        }
+
+        .ticket-box {
+            position: absolute !important;
+            left: 50% !important;
+            top: 20px !important;
+            transform: translateX(-50%) !important;
+            width: 320px !important;
+            padding: 24px !important;
+            background-color: #ffffff !important;
+            border: 2px dashed #93C5FD !important;
+            border-radius: 16px !important;
+            color: #1E293B !important;
+            box-shadow: none !important;
+        }
+
+            .ticket-box h3 {
+                color: #1E293B !important;
+                font-size: 1.15rem !important;
+                font-weight: 800 !important;
+            }
+
+            .ticket-box p {
+                color: #64748B !important;
+            }
+
+            .ticket-box .summary-list {
+                border-top: 1px solid #E2E8F0 !important;
+            }
+
+            .ticket-box .summary-row {
+                border-bottom: 1px solid #E2E8F0 !important;
+            }
+
+                .ticket-box .summary-row .label {
+                    color: #64748B !important;
+                }
+
+                .ticket-box .summary-row .value {
+                    color: #0F172A !important;
+                }
+
+                    .ticket-box .summary-row .value[style*="color: #3B82F6"],
+                    .ticket-box .summary-row .value[style*="color: rgb(59, 130, 246)"] {
+                        color: #1D4ED8 !important;
+                    }
+
+            .ticket-box .ticket-qr img {
+                border: 1px solid #E2E8F0 !important;
+            }
+
+        .btn-group {
+            display: none !important;
+        }
+    }
+</style>
+
+<div class="header-date">
+    <i class="fa-regular fa-clock"></i>
+    <span class="pageClock"></span>
+</div>
+
+<!-- Entry / Exit Mode Tabs -->
+<div class="mode-tabs">
+    <div class="mode-tab active" id="tab-entry" onclick="switchMode('entry')">
+        <i class="fa-solid fa-right-to-bracket"></i> Vehicle Entry
+    </div>
+    <div class="mode-tab" id="tab-exit" onclick="switchMode('exit')">
+        <i class="fa-solid fa-right-from-bracket"></i> Vehicle Exit &amp; Payment
+    </div>
+</div>
+
+<!-- ======================= ENTRY MODE ======================= -->
+<div id="mode-entry">
+    <div class="wizard-progress">
+        <div class="wizard-step active" id="entry-indicator-1">
+            <div class="step-bubble" id="entry-bubble-1">1</div>
+            <span class="step-label">Details</span>
+        </div>
+        <div class="wizard-step" id="entry-indicator-2">
+            <div class="step-bubble" id="entry-bubble-2">2</div>
+            <span class="step-label">Confirm</span>
+        </div>
+        <div class="wizard-step" id="entry-indicator-3">
+            <div class="step-bubble" id="entry-bubble-3">3</div>
+            <span class="step-label">Ticket</span>
+        </div>
+    </div>
+
+    <div class="pos-card">
+        <!-- ENTRY STEP 1: Details -->
+        <div id="entry-step-1">
+            <h3 style="margin-top: 0;"><i class="fa-solid fa-car"></i> Vehicle Information</h3>
+            <p style="color: #94A3B8; font-size: 0.85rem; margin-top: -10px;">No payment is collected at entry. The vehicle pays based on actual time parked when it exits.</p>
+            <div class="form-group">
+                <label class="form-label">Plate / Car Number</label>
+                <input type="text" id="inputPlate" class="form-input" placeholder="E.G. ABC 1234" autocomplete="off" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Vehicle Type</label>
+                <select id="inputVehicleType" class="form-select">
+                    <option value="Sedan">Sedan (₱@Model.CurrentRates.SedanRate.ToString("0.00")/hr)</option>
+                    <option value="SUV">SUV (₱@Model.CurrentRates.SuvRate.ToString("0.00")/hr)</option>
+                    <option value="Van">Van (₱@Model.CurrentRates.VanRate.ToString("0.00")/hr)</option>
+                    <option value="Motorcycle">Motorcycle (₱@Model.CurrentRates.MotorcycleRate.ToString("0.00")/hr)</option>
+                </select>
+            </div>
+
+            <div class="fee-box">
+                <span style="color: #94A3B8;">Assigned Slot</span>
+                <span class="fee-amount" style="font-size: 1.4rem;">@Model.AssignedSlotName</span>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn-primary" onclick="goToEntryStep(2)">Continue <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- ENTRY STEP 2: Confirm -->
+        <div id="entry-step-2" style="display: none;">
+            <h3 style="margin-top: 0;">Confirm Check-In</h3>
+            <div class="summary-list">
+                <div class="summary-row"><span class="label">Vehicle Number</span><span class="value" id="entryConfPlate">-</span></div>
+                <div class="summary-row"><span class="label">Vehicle Type</span><span class="value" id="entryConfVehicleType">-</span></div>
+                <div class="summary-row"><span class="label">Assigned Slot</span><span class="value" style="color: #3B82F6;" id="entryConfSlot">@Model.AssignedSlotName</span></div>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn-secondary" onclick="goToEntryStep(1)">Edit Details</button>
+                <button type="button" class="btn-primary" onclick="submitCheckIn()">Confirm Check-In</button>
+            </div>
+        </div>
+
+        <!-- ENTRY STEP 3: Ticket -->
+        <div id="entry-step-3" style="display: none;">
+            <div class="ticket-box print-target">
+                <h3 style="margin: 0; letter-spacing: 1px;">PARKEASE ENTRY TICKET</h3>
+                <p style="color: #94A3B8; font-size: 0.75rem; margin-top: 4px; margin-bottom: 15px;">Automated Parking Management System</p>
+
+                <div class="summary-list" style="text-align: left;">
+                    <div class="summary-row"><span class="label">Ticket Ref</span><span class="value" style="color: #3B82F6;" id="tktRef">-</span></div>
+                    <div class="summary-row"><span class="label">Plate Number</span><span class="value" id="tktPlate">-</span></div>
+                    <div class="summary-row"><span class="label">Vehicle Type</span><span class="value" id="tktType">-</span></div>
+                    <div class="summary-row"><span class="label">Parking Slot</span><span class="value" style="color: #3B82F6;" id="tktSlot">-</span></div>
+                    <div class="summary-row"><span class="label">Entry Time</span><span class="value" id="tktEntry">-</span></div>
+                </div>
+
+                <div class="ticket-qr">
+                    <img id="qrCodeImg" src="" alt="Ticket QR Code" />
+                    <p style="color: #94A3B8; font-size: 0.75rem; margin-top: 12px;">Scan QR or present plate number upon exit</p>
+                </div>
+            </div>
+
+            <div class="btn-group" style="margin-top: 20px;">
+                <button type="button" class="btn-secondary" onclick="window.print()"><i class="fa-solid fa-print"></i> Print Ticket</button>
+                <button type="button" class="btn-primary" onclick="location.reload()">New Check-In</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================= EXIT MODE ======================= -->
+<div id="mode-exit" style="display: none;">
+    <div class="wizard-progress">
+        <div class="wizard-step active" id="exit-indicator-1">
+            <div class="step-bubble" id="exit-bubble-1">1</div>
+            <span class="step-label">Find Vehicle</span>
+        </div>
+        <div class="wizard-step" id="exit-indicator-2">
+            <div class="step-bubble" id="exit-bubble-2">2</div>
+            <span class="step-label">Review Fee</span>
+        </div>
+        <div class="wizard-step" id="exit-indicator-3">
+            <div class="step-bubble" id="exit-bubble-3">3</div>
+            <span class="step-label">Payment</span>
+        </div>
+        <div class="wizard-step" id="exit-indicator-4">
+            <div class="step-bubble" id="exit-bubble-4">4</div>
+            <span class="step-label">Receipt</span>
+        </div>
+    </div>
+
+    <div class="pos-card">
+        <!-- EXIT STEP 1: Find Vehicle -->
+        <div id="exit-step-1">
+            <h3 style="margin-top: 0;"><i class="fa-solid fa-magnifying-glass"></i> Find Parked Vehicle</h3>
+            <div class="form-group">
+                <label class="form-label">Plate Number or Ticket ID</label>
+                <input type="text" id="inputFindQuery" class="form-input" placeholder="E.G. ABC 1234 or TKT-XXXXXXXX" autocomplete="off" />
+            </div>
+            <div class="btn-group" style="justify-content: flex-start; margin-top: 0; margin-bottom: 20px;">
+                <button type="button" class="btn-primary" onclick="findActiveVehicle()">Search <i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
+
+            <label class="form-label">Currently Parked (@Model.ActiveParkedVehicles.Count)</label>
+            <div class="parked-list">
+                @if (Model.ActiveParkedVehicles.Any())
+                {
+                    @foreach (var v in Model.ActiveParkedVehicles)
+                    {
+                        <div class="parked-row" onclick="selectParkedVehicle('@v.PlateNumber')">
+                            <div>
+                                <div class="plate">@v.PlateNumber</div>
+                                <div class="meta">@v.VehicleType &middot; Slot @(v.ParkingSlot?.SlotName ?? "P--")</div>
+                            </div>
+                            <div class="meta">In since @v.EntryTime.ToString("hh:mm tt")</div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="parked-empty">No vehicles are currently parked.</div>
+                }
+            </div>
+        </div>
+
+        <!-- EXIT STEP 2: Review Fee -->
+        <div id="exit-step-2" style="display: none;">
+            <h3 style="margin-top: 0;">Review Parking Duration</h3>
+            <div class="summary-list">
+                <div class="summary-row"><span class="label">Ticket Ref</span><span class="value" style="color: #3B82F6;" id="revTxnId">-</span></div>
+                <div class="summary-row"><span class="label">Plate Number</span><span class="value" id="revPlate">-</span></div>
+                <div class="summary-row"><span class="label">Vehicle Type</span><span class="value" id="revVehicleType">-</span></div>
+                <div class="summary-row"><span class="label">Slot</span><span class="value" id="revSlot">-</span></div>
+                <div class="summary-row"><span class="label">Entry Time</span><span class="value" id="revEntryTime">-</span></div>
+                <div class="summary-row"><span class="label">Estimated Duration</span><span class="value" id="revDuration">-</span></div>
+            </div>
+
+            <div class="fee-box">
+                <span style="color: #94A3B8;">Estimated Amount Due</span>
+                <span class="fee-amount" id="revAmountDue">₱0.00</span>
+            </div>
+            <p style="color: #94A3B8; font-size: 0.78rem; margin-top: 8px;">The final amount is calculated at the moment payment is confirmed.</p>
+
+            <div class="btn-group">
+                <button type="button" class="btn-secondary" onclick="goToExitStep(1)"><i class="fa-solid fa-arrow-left"></i></button>
+                <button type="button" class="btn-primary" onclick="goToExitStep(3)">Proceed to Payment</button>
+            </div>
+        </div>
+
+        <!-- EXIT STEP 3: Payment -->
+        <div id="exit-step-3" style="display: none;">
+            <h3 style="margin-top: 0;">Collect Payment</h3>
+            <div class="payment-options">
+                <div class="pay-opt selected" id="exitOptCash" onclick="selectExitPaymentMethod('Cash')">Cash</div>
+                <div class="pay-opt" id="exitOptGCash" onclick="selectExitPaymentMethod('GCash')">GCash</div>
+            </div>
+
+            <div style="background-color: #0F1523; border: 1px solid #1E293B; border-radius: 8px; padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="color: #94A3B8;">Amount Due</span>
+                    <span style="font-size: 1.5rem; font-weight: bold;" id="exitAmountDue">₱0.00</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount Received</label>
+                    <input type="number" id="inputExitAmountReceived" class="form-input" placeholder="₱ 0.00" step="0.01" />
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn-secondary" onclick="goToExitStep(2)"><i class="fa-solid fa-arrow-left"></i></button>
+                <button type="button" class="btn-primary" onclick="submitCheckOut()">Confirm Payment</button>
+            </div>
+        </div>
+
+        <!-- EXIT STEP 4: Receipt -->
+        <div id="exit-step-4" style="display: none;">
+            <div class="ticket-box print-target">
+                <h3 style="margin: 0; letter-spacing: 1px;">PARKEASE OFFICIAL RECEIPT</h3>
+                <p style="color: #94A3B8; font-size: 0.75rem; margin-top: 4px; margin-bottom: 15px;">Automated Parking Management System</p>
+
+                <div class="summary-list" style="text-align: left;">
+                    <div class="summary-row"><span class="label">Ticket Ref</span><span class="value" style="color: #3B82F6;" id="rcptTxnId">-</span></div>
+                    <div class="summary-row"><span class="label">Plate Number</span><span class="value" id="rcptPlate">-</span></div>
+                    <div class="summary-row"><span class="label">Vehicle Type</span><span class="value" id="rcptVehicleType">-</span></div>
+                    <div class="summary-row"><span class="label">Slot</span><span class="value" id="rcptSlot">-</span></div>
+                    <div class="summary-row"><span class="label">Entry Time</span><span class="value" id="rcptEntryTime">-</span></div>
+                    <div class="summary-row"><span class="label">Exit Time</span><span class="value" id="rcptExitTime">-</span></div>
+                    <div class="summary-row"><span class="label">Duration</span><span class="value" id="rcptDuration">-</span></div>
+                    <div class="summary-row" style="font-size: 1.1rem;"><span class="label" style="color: white;">Total Paid</span><span class="value" style="color: white;" id="rcptPaid">-</span></div>
+                    <div class="summary-row"><span class="label">Change Due</span><span class="value" style="color: #10B981;" id="rcptChange">₱0.00</span></div>
+                </div>
+            </div>
+
+            <div class="btn-group" style="margin-top: 20px;">
+                <button type="button" class="btn-secondary" onclick="window.print()"><i class="fa-solid fa-print"></i> Print Receipt</button>
+                <button type="button" class="btn-primary" onclick="location.reload()">Next Vehicle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let selectedExitPayment = 'Cash';
+        let activeExitTransaction = null; // { transactionId, hourlyRate, ... }
+
+        function switchMode(mode) {
+            document.getElementById('mode-entry').style.display = mode === 'entry' ? 'block' : 'none';
+            document.getElementById('mode-exit').style.display = mode === 'exit' ? 'block' : 'none';
+            document.getElementById('tab-entry').classList.toggle('active', mode === 'entry');
+            document.getElementById('tab-exit').classList.toggle('active', mode === 'exit');
+        }
+
+        function getToken() {
+            return document.querySelector('input[name="__RequestVerificationToken"]').value;
+        }
+
+        /* ---------------- ENTRY FLOW ---------------- */
+
+        function goToEntryStep(step) {
+            if (step === 2) {
+                const plate = document.getElementById('inputPlate').value.trim();
+                if (!plate) {
+                    alert('Please enter a vehicle plate number.');
+                    return;
+                }
+                document.getElementById('entryConfPlate').innerText = plate;
+                document.getElementById('entryConfVehicleType').innerText = document.getElementById('inputVehicleType').value;
+            }
+
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById('entry-step-' + i).style.display = 'none';
+                const indicator = document.getElementById('entry-indicator-' + i);
+                indicator.classList.remove('active', 'completed');
+                if (i < step) indicator.classList.add('completed');
+                if (i === step) indicator.classList.add('active');
+            }
+            document.getElementById('entry-step-' + step).style.display = 'block';
+        }
+
+        async function submitCheckIn() {
+            const payload = {
+                PlateNumber: document.getElementById('inputPlate').value,
+                VehicleType: document.getElementById('inputVehicleType').value
+            };
+
+            try {
+                const response = await fetch('?handler=CheckIn', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': getToken() },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('tktRef').innerText = result.transactionId;
+                    document.getElementById('tktPlate').innerText = result.plateNumber;
+                    document.getElementById('tktType').innerText = result.vehicleType;
+                    document.getElementById('tktSlot').innerText = result.assignedSlot;
+                    document.getElementById('tktEntry').innerText = result.date + ' — ' + result.entryTime;
+                    document.getElementById('qrCodeImg').src = 'https://quickchart.io/qr?text=' + encodeURIComponent(result.transactionId) + '&size=150';
+                    goToEntryStep(3);
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (err) {
+                alert('Failed to process check-in.');
+            }
+        }
+
+        /* ---------------- EXIT FLOW ---------------- */
+
+        function goToExitStep(step) {
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById('exit-step-' + i).style.display = 'none';
+                const indicator = document.getElementById('exit-indicator-' + i);
+                indicator.classList.remove('active', 'completed');
+                if (i < step) indicator.classList.add('completed');
+                if (i === step) indicator.classList.add('active');
+            }
+            document.getElementById('exit-step-' + step).style.display = 'block';
+        }
+
+        function selectParkedVehicle(plate) {
+            document.getElementById('inputFindQuery').value = plate;
+            findActiveVehicle();
+        }
+
+        async function findActiveVehicle() {
+            const query = document.getElementById('inputFindQuery').value.trim();
+            if (!query) {
+                alert('Enter a plate number or ticket ID.');
+                return;
+            }
+
+            try {
+                const response = await fetch('?handler=FindActive', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': getToken() },
+                    body: JSON.stringify({ Query: query })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    activeExitTransaction = result;
+                    document.getElementById('revTxnId').innerText = result.transactionId;
+                    document.getElementById('revPlate').innerText = result.plateNumber;
+                    document.getElementById('revVehicleType').innerText = result.vehicleType;
+                    document.getElementById('revSlot').innerText = result.assignedSlot;
+                    document.getElementById('revEntryTime').innerText = result.entryTime;
+                    document.getElementById('revDuration').innerText = result.estimatedHours + ' Hour(s)';
+                    document.getElementById('revAmountDue').innerText = '₱' + result.amountDue.toFixed(2);
+                    document.getElementById('exitAmountDue').innerText = '₱' + result.amountDue.toFixed(2);
+                    goToExitStep(2);
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (err) {
+                alert('Failed to look up vehicle.');
+            }
+        }
+
+        function selectExitPaymentMethod(method) {
+            selectedExitPayment = method;
+            document.getElementById('exitOptCash').classList.toggle('selected', method === 'Cash');
+            document.getElementById('exitOptGCash').classList.toggle('selected', method === 'GCash');
+        }
+
+        async function submitCheckOut() {
+            if (!activeExitTransaction) {
+                alert('No vehicle selected.');
+                return;
+            }
+
+            const amountReceived = parseFloat(document.getElementById('inputExitAmountReceived').value) || 0;
+
+            const payload = {
+                TransactionID: activeExitTransaction.transactionId,
+                PaymentMethod: selectedExitPayment,
+                AmountReceived: amountReceived
+            };
+
+            try {
+                const response = await fetch('?handler=CheckOut', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': getToken() },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('rcptTxnId').innerText = result.transactionId;
+                    document.getElementById('rcptPlate').innerText = result.plateNumber;
+                    document.getElementById('rcptVehicleType').innerText = result.vehicleType;
+                    document.getElementById('rcptSlot').innerText = result.assignedSlot;
+                    document.getElementById('rcptEntryTime').innerText = result.entryTime;
+                    document.getElementById('rcptExitTime').innerText = result.exitTime;
+                    document.getElementById('rcptDuration').innerText = result.parkingDuration + ' Hour(s)';
+                    document.getElementById('rcptPaid').innerText = '₱' + result.amountPaid.toFixed(2);
+                    document.getElementById('rcptChange').innerText = '₱' + result.changeDue.toFixed(2);
+                    goToExitStep(4);
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (err) {
+                alert('Failed to process payment.');
+            }
+        }
+    </script>
+}

@@ -1,0 +1,120 @@
+﻿@using System.Security.Claims
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ParkEase</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- Load saved theme immediately -->
+    <script>
+        const savedTheme = localStorage.getItem('parkease-theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="~/images/ParkEase-removebg-preview.png" alt="ParkEase Logo" style="height: 30px; margin-right: 10px;" />
+                ParkEase
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Index" ? "active" : "")" href="/">
+                        <i class="fa-solid fa-table-cells-large" style="width: 25px;"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/SalesInput" ? "active" : "")" href="/SalesInput">
+                        <i class="fa-solid fa-file-invoice-dollar" style="width: 25px;"></i> Sales Input (POS)
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/ParkingAvailability" ? "active" : "")" href="/ParkingAvailability">
+                        <i class="fa-solid fa-square-parking" style="width: 25px;"></i> Parking Availability
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Profile" ? "active" : "")" href="/Profile">
+                        <i class="fa-regular fa-user" style="width: 25px;"></i> Profile
+                    </a>
+                </li>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Transactions" ? "active" : "")" href="/Transactions">
+                            <i class="fa-solid fa-money-bill-transfer" style="width: 25px;"></i> Transactions
+                        </a>
+                    </li>
+                }
+
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Settings" ? "active" : "")" href="/Settings">
+                        <i class="fa-solid fa-gear" style="width: 25px;"></i> Settings
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Dynamic User Indicator -->
+            <div class="user-indicator">
+                <div class="user-avatar">
+                    @(User.Identity?.Name?.FirstOrDefault().ToString().ToUpper() ?? "U")
+                </div>
+                <div class="user-info">
+                    <span class="user-name">@(User.Identity?.Name ?? "User")</span>
+                    <span class="user-role">@(User.FindFirst(ClaimTypes.Role)?.Value ?? "Staff")</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+
+    <script>
+            function updateLiveClock() {
+                const now = new Date();
+
+                const dateTime = new Intl.DateTimeFormat('en-US', {
+                    timeZone: 'Asia/Manila',
+                    month: 'long',
+                    day: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                }).format(now);
+
+                // Dashboard clock
+                const dashboardClock = document.getElementById('dashboardClock');
+
+                if (dashboardClock) {
+                    dashboardClock.textContent = dateTime;
+                }
+
+                // All other page clocks
+                document.querySelectorAll('.pageClock').forEach(clock => {
+                    clock.textContent = dateTime;
+                });
+            }
+
+            updateLiveClock();
+            setInterval(updateLiveClock, 1000);
+    </script>
+
+</body>
+</html>

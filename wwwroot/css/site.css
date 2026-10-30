@@ -1,0 +1,501 @@
+/* =========================================
+   1. SYSTEM THEME VARIABLES
+   ========================================= */
+:root {
+    --bg-main: #0B1120;
+    --bg-sidebar: #0F1523;
+    --bg-card: #151C2C;
+    --bg-sub: #0F1523;
+    --text-primary: #F8FAFC;
+    --text-muted: #94A3B8;
+    --accent-blue: #3B82F6;
+    --accent-hover: #2563EB;
+    --border-color: #1E293B;
+    --card-shadow: none;
+    --badge-bg: rgba(59, 130, 246, 0.15);
+    --slot-avail-bg: #151C2C;
+    --slot-occ-bg: #0F1523;
+}
+
+[data-theme="light"] {
+    --bg-main: #F8FAFC;
+    --bg-sidebar: #FFFFFF;
+    --bg-card: #FFFFFF;
+    --bg-sub: #F1F5F9;
+    --text-primary: #0F172A;
+    --text-muted: #64748B;
+    --accent-blue: #2563EB;
+    --accent-hover: #1D4ED8;
+    --border-color: #E2E8F0;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+    --badge-bg: rgba(37, 99, 235, 0.1);
+    --slot-avail-bg: #FFFFFF;
+    --slot-occ-bg: #F1F5F9;
+}
+
+/* =========================================
+   2. GLOBAL RESET & BASE STYLES
+   ========================================= */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(rgba(11, 17, 32, 0.75), rgba(11, 17, 32, 0.75)), url('/images/mnbrkn.jpg') center / cover no-repeat fixed;
+    color: var(--text-primary) !important;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.main-content {
+    flex-grow: 1;
+    min-width: 0;
+    overflow-y: auto;
+    padding: 30px;
+    /* Dark mode background (default) */
+    background: linear-gradient(rgba(11, 17, 32, 0.65), rgba(11, 17, 32, 0.65)), url('/images/mnbrkn.jpg') center center / cover no-repeat !important;
+}
+
+/* Light mode background */
+[data-theme="light"] .main-content {
+    background: linear-gradient(rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.65)), url('/images/lghtbrkn.png') center center / cover no-repeat !important;
+}
+
+/* =========================================
+   3. SIDEBAR & NAVIGATION STRUCTURE
+   ========================================= */
+.sidebar {
+    width: 260px;
+    min-width: 260px;
+    background-color: var(--bg-sidebar) !important;
+    border-right: 1px solid var(--border-color) !important;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    padding: 0 20px 25px 20px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary) !important;
+}
+
+    .sidebar-logo img {
+        height: 30px;
+        margin-right: 10px;
+    }
+
+.nav-menu {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex-grow: 1;
+}
+
+.nav-item {
+    list-style: none !important;
+    padding: 0 15px;
+    margin-bottom: 6px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    color: var(--text-muted) !important;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+    .nav-link i {
+        width: 25px;
+        font-size: 1.1rem;
+    }
+
+    .nav-link:hover {
+        background-color: var(--bg-sub) !important;
+        color: var(--text-primary) !important;
+    }
+
+    .nav-link.active {
+        background-color: var(--accent-blue) !important;
+        color: #FFFFFF !important;
+    }
+
+        .nav-link.active i {
+            color: #FFFFFF !important;
+        }
+
+/* User Profile Badge (Sidebar Footer) */
+.user-indicator {
+    margin: 20px 15px 0 15px;
+    padding: 12px 15px;
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    box-shadow: var(--card-shadow);
+}
+
+.user-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    background-color: var(--accent-blue);
+    color: #FFFFFF;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-right: 12px;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.user-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary) !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-role {
+    font-size: 0.75rem;
+    color: var(--text-muted) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* =========================================
+   4. CARDS & CONTAINER OVERRIDES
+   ========================================= */
+.card, .pos-card, .metric-card, .status-card, .summary-card,
+.content-box, .filter-card, .table-card, .login-card {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow) !important;
+    color: var(--text-primary) !important;
+}
+
+.fee-box, .pay-opt, .ticket-box, .chart-placeholder, .theme-card {
+    background-color: var(--bg-sub) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+    .pay-opt.selected, .theme-card.active {
+        background-color: var(--badge-bg) !important;
+        border-color: var(--accent-blue) !important;
+        color: var(--accent-blue) !important;
+    }
+
+/* Dynamic Inline Override Guards for Light Mode */
+[data-theme="light"] [style*="background-color: #151C2C"],
+[data-theme="light"] [style*="background-color: rgb(21, 28, 44)"] {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="light"] [style*="background-color: #0F1523"],
+[data-theme="light"] [style*="background-color: rgb(15, 21, 35)"] {
+    background-color: var(--bg-sub) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* =========================================
+   5. TYPOGRAPHY & TEXT READABILITY
+   ========================================= */
+h1, h2, h3, h4, h5, h6,
+.page-title, .pos-title, .header-title, .metric-num, .profile-name,
+.summary-value, .fee-amount, .card-title, .slot-name {
+    color: var(--text-primary) !important;
+}
+
+.page-time, .pos-time, .header-date, .metric-label, .form-label,
+.summary-row .label, .step-label, .info-row .label, .data-table th,
+.slot-status {
+    color: var(--text-muted) !important;
+}
+
+/* Light Mode Inline Color Correction */
+[data-theme="light"] [style*="color: #F8FAFC"],
+[data-theme="light"] [style*="color: white"],
+[data-theme="light"] [style*="color: #ffffff"] {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="light"] [style*="color: #94A3B8"] {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="light"] [style*="border-color: #1E293B"] {
+    border-color: var(--border-color) !important;
+}
+
+/* Preserve Accent Colors with Adjusted High Contrast */
+[data-theme="light"] [style*="color: #3B82F6"] {
+    color: var(--accent-blue) !important;
+}
+
+[data-theme="light"] [style*="color: #10B981"] {
+    color: #059669 !important;
+}
+
+/* =========================================
+   6. FORMS, INPUTS & DROPDOWNS
+   ========================================= */
+.form-control, .form-input, .form-select {
+    background-color: var(--bg-sub) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+    border-radius: 8px;
+}
+
+    .form-control:focus, .form-input:focus, .form-select:focus {
+        border-color: var(--accent-blue) !important;
+        outline: none;
+    }
+
+    .form-input::placeholder {
+        color: var(--text-muted) !important;
+    }
+
+/* =========================================
+   7. TABLES, LISTS & BADGES
+   ========================================= */
+.data-table th {
+    color: var(--text-muted) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.data-table td {
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.summary-row, .info-row {
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+    .summary-row .label, .info-row .label {
+        color: var(--text-muted) !important;
+    }
+
+    .summary-row .value, .info-row .value {
+        color: var(--text-primary) !important;
+    }
+
+.badge-method {
+    background-color: var(--bg-sub) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-muted) !important;
+}
+
+.profile-role-badge {
+    background-color: var(--badge-bg) !important;
+    color: var(--accent-blue) !important;
+}
+
+.progress-bar-bg {
+    background-color: var(--bg-sub) !important;
+}
+
+/* =========================================
+   8. POS WIZARD & PROGRESS BUBBLES
+   ========================================= */
+.step-bubble {
+    background-color: var(--bg-sub) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-muted) !important;
+}
+
+.wizard-step.active .step-bubble {
+    background-color: var(--accent-blue) !important;
+    color: #FFFFFF !important;
+    border-color: var(--accent-blue) !important;
+}
+
+.wizard-step.completed .step-bubble {
+    background-color: #10B981 !important;
+    color: #FFFFFF !important;
+    border-color: #10B981 !important;
+}
+
+/* =========================================
+   9. PARKING SLOTS GRID (P1 - P30)
+   ========================================= */
+.slot-card {
+    background-color: var(--bg-sub) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 10px;
+}
+
+    .slot-card.available {
+        background-color: var(--slot-avail-bg) !important;
+        border-color: var(--accent-blue) !important;
+    }
+
+        .slot-card.available .slot-name {
+            color: var(--text-primary) !important;
+        }
+
+        .slot-card.available .slot-status {
+            color: var(--accent-blue) !important;
+        }
+
+    .slot-card.occupied {
+        background-color: var(--slot-occ-bg) !important;
+        border-color: var(--border-color) !important;
+        opacity: 0.7;
+    }
+
+        .slot-card.occupied .slot-name,
+        .slot-card.occupied .slot-status {
+            color: var(--text-muted) !important;
+        }
+
+.dot-available {
+    background-color: var(--accent-blue) !important;
+}
+
+.dot-occupied {
+    background-color: var(--text-muted) !important;
+}
+
+/* =========================================
+   10. BUTTON CONTROLS
+   ========================================= */
+.btn-primary, .btn-save, .btn-search {
+    background-color: var(--accent-blue) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+}
+
+    .btn-primary:hover, .btn-save:hover, .btn-search:hover {
+        background-color: var(--accent-hover) !important;
+    }
+
+.btn-secondary, .btn-reset {
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-muted) !important;
+    background-color: transparent !important;
+}
+
+    .btn-secondary:hover, .btn-reset:hover {
+        background-color: var(--bg-sub) !important;
+        color: var(--text-primary) !important;
+    }
+
+.btn-logout {
+    background-color: #EF4444 !important;
+    color: #FFFFFF !important;
+    border: none !important;
+}
+
+    .btn-logout:hover {
+        background-color: #DC2626 !important;
+    }
+
+/* =========================================
+   11. PRINT STYLES (POS TICKET GENERATION)
+   ========================================= */
+@media print {
+    body * {
+        visibility: hidden !important;
+    }
+
+    #step-5, #step-5 *, .ticket-box, .ticket-box * {
+        visibility: visible !important;
+    }
+
+    body {
+        background-color: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .ticket-box {
+        position: absolute !important;
+        left: 50% !important;
+        top: 20px !important;
+        transform: translateX(-50%) !important;
+        width: 320px !important;
+        padding: 24px !important;
+        background-color: #ffffff !important;
+        border: 2px dashed #93C5FD !important;
+        border-radius: 16px !important;
+        color: #1E293B !important;
+        box-shadow: none !important;
+    }
+
+        .ticket-box h3 {
+            color: #1E293B !important;
+        }
+
+        .ticket-box p {
+            color: #64748B !important;
+        }
+
+        .ticket-box .summary-row {
+            border-bottom: 1px solid #E2E8F0 !important;
+        }
+
+            .ticket-box .summary-row .label {
+                color: #64748B !important;
+            }
+
+            .ticket-box .summary-row .value {
+                color: #0F172A !important;
+            }
+
+    .btn-group {
+        display: none !important;
+    }
+}
+
+/* =========================================
+   12. HEADER AND LIVE CLOCK ALIGNMENT
+   ========================================= */
+
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.header-date {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    text-align: right;
+    gap: 8px;
+    margin-left: auto;
+    white-space: nowrap;
+}
+}

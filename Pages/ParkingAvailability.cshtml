@@ -1,0 +1,112 @@
+@page
+@model parkEASE.Pages.ParkingAvailabilityModel
+@{
+    ViewData["Title"] = "Parking Availability";
+}
+<style>
+    .page-header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+    .page-title{font-size:1.5rem;font-weight:700}.page-time,.muted{color:var(--text-muted)}
+    .summary-card,.slot-panel,.archived-panel{background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:20px;margin-bottom:22px}
+    .metrics{display:flex;gap:42px;flex-wrap:wrap}.metric{display:flex;flex-direction:column;gap:4px}.metric-label{font-size:.8rem;color:var(--text-muted)}.metric-num{font-size:1.7rem;font-weight:700}
+    .slots-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+    .slot{border:1px solid var(--border-color);border-radius:10px;background:var(--bg-sub);padding:14px;min-width:0}
+    .slot.available{border-color:var(--accent-blue)}.slot.occupied{border-color:#64748b}
+    .slot summary{cursor:pointer;list-style:none;display:flex;flex-direction:column;gap:6px}.slot summary::-webkit-details-marker{display:none}
+    .slot-name{font-size:1.2rem;font-weight:800;color:var(--text-primary)}.slot-status{font-size:.72rem;font-weight:700;letter-spacing:.05em;color:var(--text-muted)}
+    .slot.available .slot-status{color:var(--accent-blue)}.slot-details{border-top:1px solid var(--border-color);margin-top:12px;padding-top:12px;font-size:.84rem;overflow-wrap:anywhere}
+    .detail-row{display:flex;justify-content:space-between;gap:10px;padding:5px 0}.detail-row span:first-child{color:var(--text-muted)}.detail-row strong{text-align:right}
+    .btn{display:inline-block;border:0;border-radius:7px;padding:8px 12px;font-weight:600;cursor:pointer;text-decoration:none;font-size:.82rem}
+    .btn-archive{background:#7f1d1d;color:#fff}.btn-restore{background:var(--accent-blue);color:#fff}.notice{padding:12px 14px;border:1px solid var(--border-color);border-radius:8px;margin-bottom:18px;background:var(--bg-sub)}
+    .section-title{font-size:1.05rem;font-weight:700;margin:0 0 14px}.archived-list{display:flex;gap:10px;flex-wrap:wrap}.archived-item{display:flex;align-items:center;gap:12px;border:1px solid var(--border-color);border-radius:8px;padding:10px 12px;background:var(--bg-sub)}
+    @@media(max-width:1100px){.slots-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+    @@media(max-width:700px){.slots-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics{gap:22px}}
+</style>
+
+<div class="header-date">
+    <i class="fa-regular fa-clock"></i>
+    <span class="pageClock"></span>
+</div>
+
+@if (TempData["SlotMessage"] is string message)
+{
+    <div class="notice">@message</div>
+}
+
+<div class="summary-card">
+    <div class="metrics">
+        <div class="metric"><span class="metric-label">Active Spaces</span><span class="metric-num">@Model.TotalSpaces</span></div>
+        <div class="metric"><span class="metric-label">Available</span><span class="metric-num" style="color:var(--accent-blue)">@Model.AvailableSpaces</span></div>
+        <div class="metric"><span class="metric-label">Occupied</span><span class="metric-num">@Model.OccupiedSpaces</span></div>
+        <div class="metric"><span class="metric-label">Archived</span><span class="metric-num">@Model.ArchivedSlots.Count</span></div>
+    </div>
+</div>
+
+<div class="slot-panel">
+    <h2 class="section-title">Active Parking Slots</h2>
+    <p class="muted" style="font-size:.85rem;margin-top:-6px">Select a slot to view its details. Occupancy is controlled by POS check-in and checkout.</p>
+    @if (Model.Slots.Count == 0)
+    {
+        <p class="muted">No active parking slots have been configured.</p>
+    }
+    else
+    {
+        <div class="slots-grid">
+            @foreach (var item in Model.Slots)
+            {
+                var vehicle = item.CurrentVehicle;
+                var occupied = vehicle != null || item.Slot.Status == "Occupied";
+                <details class="slot @(occupied ? "occupied" : "available")">
+                    <summary>
+                        <span class="slot-name">@item.Slot.SlotName</span>
+                        <span class="slot-status">@(occupied ? "OCCUPIED" : "AVAILABLE")</span>
+                        <span class="muted" style="font-size:.72rem">Click for details</span>
+                    </summary>
+                    <div class="slot-details">
+                        @if (vehicle != null)
+                        {
+                            <div class="detail-row"><span>Ticket ID</span><strong>@vehicle.TransactionID</strong></div>
+                            <div class="detail-row"><span>Plate number</span><strong>@vehicle.PlateNumber</strong></div>
+                            <div class="detail-row"><span>Vehicle</span><strong>@vehicle.VehicleType</strong></div>
+                            <div class="detail-row"><span>Entry time</span><strong>@vehicle.EntryTime.ToString("MMM dd, yyyy hh:mm tt")</strong></div>
+                            <div class="detail-row"><span>Hourly rate</span><strong>₱@vehicle.HourlyRate.ToString("N2")</strong></div>
+                            <div class="detail-row"><span>Elapsed</span><strong>@((DateTime.Now - vehicle.EntryTime).TotalHours.ToString("0.0")) hrs</strong></div>
+                        }
+                        else if (occupied)
+                        {
+                            <p class="muted">The slot is marked occupied, but no active POS ticket is linked to it. Check the slot record before changing its status.</p>
+                        }
+                        else
+                        {
+                            <p class="muted">This slot is ready for the next POS check-in.</p>
+                            <form method="post" asp-page-handler="ArchiveSlot" asp-route-slotId="@item.Slot.SlotID" onsubmit="return confirm('Archive @item.Slot.SlotName? It will no longer be available in POS until restored.');">
+                                <button type="submit" class="btn btn-archive"><i class="fa-solid fa-box-archive"></i> Archive slot</button>
+                            </form>
+                        }
+                    </div>
+                </details>
+            }
+        </div>
+    }
+</div>
+
+<div class="archived-panel">
+    <h2 class="section-title">Archived Slots</h2>
+    @if (Model.ArchivedSlots.Count == 0)
+    {
+        <p class="muted" style="margin:0">There are no archived slots.</p>
+    }
+    else
+    {
+        <div class="archived-list">
+            @foreach (var slot in Model.ArchivedSlots)
+            {
+                <div class="archived-item">
+                    <strong>@slot.SlotName</strong>
+                    <form method="post" asp-page-handler="RestoreSlot" asp-route-slotId="@slot.SlotID">
+                        <button type="submit" class="btn btn-restore"><i class="fa-solid fa-rotate-left"></i> Restore</button>
+                    </form>
+                </div>
+            }
+        </div>
+    }
+</div>
